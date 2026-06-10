@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Giotto Suite — Spatial Transcriptomics</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #181b22;
+    --border: #1f2430;
+    --border2: #2a2f3e;
+    --text: #e2e8f0;
+    --text-muted: #64748b;
+    --text-dim: #94a3b8;
+    --accent: #38bdf8;
+    --accent2: #818cf8;
+    --seq: #34d399;
+    --img-rna: #f472b6;
+    --img-pro: #fb923c;
+    --other: #a78bfa;
+    --code-bg: #0d1117;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(56,189,248,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(56,189,248,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  header {
+    padding: 3.5rem 0 2rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .logo-block {}
+
+  .logo-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--text);
+  }
+
+  h1 span {
+    color: var(--accent);
+  }
+
+  .header-meta {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    text-align: right;
+  }
+
+  .header-meta a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  /* Nav tabs */
+  .nav-tabs {
+    display: flex;
+    gap: 0.25rem;
+    margin-bottom: 2.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 5px;
+    overflow-x: auto;
+  }
+
+  .tab-btn {
+    flex: 1;
+    min-width: fit-content;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 7px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .tab-btn:hover { color: var(--text); background: var(--border); }
+
+  .tab-btn.active {
+    background: var(--accent);
+    color: #0a0c10;
+    font-weight: 600;
+  }
+
+  /* Tab panels */
+  .tab-panel { display: none; animation: fadeIn 0.3s ease; }
+  .tab-panel.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Section headings */
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    color: var(--text);
+  }
+
+  .section-title span {
+    color: var(--accent);
+  }
+
+  /* Overview panel */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  @media (max-width: 640px) { .overview-grid { grid-template-columns: 1fr; } }
+
+  .info-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: border-color 0.2s;
+  }
+
+  .info-card:hover { border-color: var(--border2); }
+
+  .info-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: var(--accent);
+  }
+
+  .info-card p {
+    color: var(--text-dim);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .module-pills {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+
+  .pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid;
+  }
+
+  .pill-blue { color: var(--accent); border-color: rgba(56,189,248,0.3); background: rgba(56,189,248,0.06); }
+  .pill-purple { color: var(--accent2); border-color: rgba(129,140,248,0.3); background: rgba(129,140,248,0.06); }
+  .pill-green { color: var(--seq); border-color: rgba(52,211,153,0.3); background: rgba(52,211,153,0.06); }
+
+  .overview-diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .diagram-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 1.25rem;
+  }
+
+  .arch-flow {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .arch-node {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    transition: all 0.2s;
+    cursor: default;
+  }
+
+  .arch-node:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .arch-node.highlight { border-color: rgba(56,189,248,0.4); color: var(--accent); }
+
+  .arch-arrow {
+    color: var(--text-muted);
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  /* Platforms panel */
+  .platform-category {
+    margin-bottom: 2rem;
+  }
+
+  .category-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .category-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .category-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .platform-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .platform-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 0.65rem 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .platform-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .platform-card:hover::before { opacity: 1; }
+  .platform-card.active::before { opacity: 1; }
+
+  .platform-card:hover, .platform-card.active {
+    border-color: var(--border2);
+    transform: translateY(-1px);
+  }
+
+  .seq .platform-card::before { background: var(--seq); }
+  .img-rna .platform-card::before { background: var(--img-rna); }
+  .img-pro .platform-card::before { background: var(--img-pro); }
+  .other-cat .platform-card::before { background: var(--other); }
+
+  .platform-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .platform-vendor {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    margin-top: 1px;
+  }
+
+  .platform-detail {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+    display: none;
+    animation: fadeIn 0.25s ease;
+  }
+
+  .platform-detail.visible { display: block; }
+
+  .detail-fn {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .detail-inputs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .input-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 5px;
+    background: var(--code-bg);
+    border: 1px solid var(--border2);
+    color: var(--text-dim);
+  }
+
+  /* Formats panel */
+  .constructor-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .constructor-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .constructor-card:hover { border-color: var(--border2); }
+
+  .constructor-header {
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    user-select: none;
+  }
+
+  .constructor-fn {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+  }
+
+  .constructor-platform {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .chevron {
+    color: var(--text-muted);
+    font-size: 12px;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+
+  .constructor-card.open .chevron { transform: rotate(180deg); }
+
+  .constructor-body {
+    display: none;
+    padding: 0 1.25rem 1.25rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .constructor-card.open .constructor-body { display: block; }
+
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: 0.75rem 0;
+    overflow-x: auto;
+  }
+
+  .code-block pre {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.8;
+    white-space: pre;
+  }
+
+  .code-block .kw { color: #7dd3fc; }
+  .code-block .fn { color: var(--accent); }
+  .code-block .str { color: #86efac; }
+  .code-block .cm { color: #475569; }
+  .code-block .arg { color: #fda4af; }
+
+  .format-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+  }
+
+  .fmt-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 5px;
+    background: rgba(56,189,248,0.07);
+    border: 1px solid rgba(56,189,248,0.2);
+    color: var(--accent);
+  }
+
+  .fmt-note {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 0.75rem;
+    line-height: 1.6;
+  }
+
+  /* Analysis panel */
+  .capability-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .cap-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .cap-card:hover, .cap-card.active {
+    border-color: var(--border2);
+    background: var(--surface2);
+  }
+
+  .cap-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .cap-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    color: var(--text);
+  }
+
+  .cap-methods {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .cap-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    display: none;
+  }
+
+  .cap-card.active .cap-desc { display: block; }
+
+  /* Architecture panel */
+  .arch-section {
+    margin-bottom: 2rem;
+  }
+
+  .arch-section h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-dim);
+  }
+
+  .slots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .slot-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: border-color 0.2s;
+  }
+
+  .slot-item:hover { border-color: var(--accent); }
+
+  .slot-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--accent2);
+    margin-bottom: 3px;
+  }
+
+  .slot-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .note-box {
+    background: rgba(56,189,248,0.05);
+    border: 1px solid rgba(56,189,248,0.15);
+    border-radius: 10px;
+    padding: 1.1rem 1.25rem;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.7;
+    margin-top: 1rem;
+  }
+
+  .note-box strong {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem 0;
+    margin-top: 3rem;
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+
+  footer a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="header-inner">
+      <div class="logo-block">
+        <div class="logo-eyebrow">reference · bioinformatics</div>
+        <h1>Giotto <span>Suite</span></h1>
+      </div>
+      <div class="header-meta">
+        Spatial Multi-Omics Analysis<br>
+        <a href="https://giottosuite.readthedocs.io" target="_blank">giottosuite.readthedocs.io</a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="nav-tabs" role="tablist">
+    <button class="tab-btn active" onclick="switchTab('overview', this)">Overview</button>
+    <button class="tab-btn" onclick="switchTab('platforms', this)">Platforms</button>
+    <button class="tab-btn" onclick="switchTab('formats', this)">Data Formats</button>
+    <button class="tab-btn" onclick="switchTab('analysis', this)">Analysis</button>
+    <button class="tab-btn" onclick="switchTab('architecture', this)">Architecture</button>
+  </nav>
+
+  <!-- OVERVIEW -->
+  <div id="tab-overview" class="tab-panel active">
+    <div class="overview-grid">
+      <div class="info-card">
+        <h3>What is Giotto?</h3>
+        <p>An R-native toolkit (with emerging Python bindings) for comprehensive analysis and visualization of spatial multi-omics data. Handles data across resolutions — subcellular, single-cell, multi-cell — in 2D and 3D.</p>
+        <div class="module-pills">
+          <span class="pill pill-blue">GiottoClass</span>
+          <span class="pill pill-purple">GiottoUtils</span>
+          <span class="pill pill-green">GiottoVisuals</span>
+        </div>
+      </div>
+      <div class="info-card">
+        <h3>Design Philosophy</h3>
+        <p>Technology-agnostic framework generalizable to virtually all current and emerging spatial platforms, regardless of resolution, modality (RNA, protein, DNA), or spatial dimension.</p>
+      </div>
+      <div class="info-card">
+        <h3>Key Strengths</h3>
+        <p>Dedicated constructors for major platforms, spatial network-aware statistics, image-backed large dataset support via terra/SpatRaster, and solid interop with Seurat and SingleCellExperiment.</p>
+      </div>
+      <div class="info-card">
+        <h3>Things to Know First</h3>
+        <p>Spatial network construction (Delaunay or kNN by distance) is a prerequisite for most spatial statistics. Build the network before running spatial variable gene tests or proximity enrichment.</p>
+      </div>
+    </div>
+
+    <div class="overview-diagram">
+      <div class="diagram-title">Typical analysis workflow</div>
+      <div class="arch-flow">
+        <div class="arch-node highlight">Raw data / output dir</div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node highlight">createGiotto*Object()</div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node">Filter + Normalize</div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node">Dim reduction</div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node">Spatial network</div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node highlight">Spatial stats</div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node highlight">Visualization</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLATFORMS -->
+  <div id="tab-platforms" class="tab-panel">
+    <div class="platform-category seq">
+      <div class="category-header">
+        <div class="category-dot" style="background:var(--seq)"></div>
+        <span class="category-label">Sequencing-based</span>
+      </div>
+      <div class="platform-grid">
+        <div class="platform-card" onclick="showPlatform('visium', this)">
+          <div class="platform-name">Visium</div>
+          <div class="platform-vendor">10x Genomics</div>
+        </div>
+        <div class="platform-card" onclick="showPlatform('cytassist', this)">
+          <div class="platform-name">CytAssist Visium</div>
+          <div class="platform-vendor">10x Genomics · FFPE</div>
+        </div>
+        <div class="platform-card" onclick="showPlatform('stereoseq', this)">
+          <div class="platform-name">Stereo-seq</div>
+          <div class="platform-vendor">BGI</div>
+        </div>
+        <div class="platform-card" onclick="showPlatform('seqscope', this)">
+          <div class="platform-name">Seq-Scope</div>
+          <div class="platform-vendor">University of Michigan</div>
+        </div>
+        <div class="platform-card" onclick="showPlatform('spatialgenomics', this)">
+          <div class="platform-name">Spatial Genomics</div>
+          <div class="platform-vendor">Spatial Genomics</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="platform-category img-rna">
+      <div class="category-header">
+        <div class="category-dot" style="background:var(--img-rna)"></div>
+        <span class="category-label">Imaging-based · RNA</span>
+      </div>
+      <div class="platform-grid">
+        <div class="platform-card" onclick="showPlatform('xenium', this)">
+          <div class="platform-name">Xenium</div>
+          <div class="platform-vendor">10x Genomics</div>
+        </div>
+        <div class="platform-card" onclick="showPlatform('merscope', this)">
+          <div class="platform-name">MERSCOPE</div>
+          <div class="platform-vendor">Vizgen</div>
+        </div>
+        <div class="platform-card" onclick="showPlatform('merfish', this)">
+          <div class="platform-name">MERFISH</div>
+          <div class="platform-vendor">Generic</div>
+        </div>
+        <div class="platform-card" onclick="showPlatform('seqfish', this)">
+          <div class="platform-name">seqFISH / seqFISH+</div>
+          <div class="platform-vendor">Cai Lab</div>
+        </div>
+        <div class="platform-card" onclick="showPlatform('osmfish', this)">
+          <div class="platform-name">osmFISH</div>
+          <div class="platform-vendor">Generic</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="platform-category img-pro">
+      <div class="category-header">
+        <div class="category-dot" style="background:var(--img-pro)"></div>
+        <span class="category-label">Imaging-based · Protein</span>
+      </div>
+      <div class="platform-grid">
+        <div class="platform-card" onclick="showPlatform('cosmx', this)">
+          <div class="platform-name">CosMx</div>
+          <div class="platform-vendor">Nanostring</div>
+        </div>
+        <div class="platform-card" onclick="showPlatform('codex', this)">
+          <div class="platform-name">CODEX</div>
+          <div class="platform-vendor">Akoya</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="platform-category other-cat">
+      <div class="category-header">
+        <div class="category-dot" style="background:var(--other)"></div>
+        <span class="category-label">Other</span>
+      </div>
+      <div class="platform-grid">
+        <div class="platform-card" onclick="showPlatform('resolve', this)">
+          <div class="platform-name">Resolve Biosciences</div>
+          <div class="platform-vendor">Resolve</div>
+        </div>
+        <div class="platform-card" onclick="showPlatform('scrna', this)">
+          <div class="platform-name">scRNA-seq</div>
+          <div class="platform-vendor">Integration / deconvolution</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="platform-detail" class="platform-detail"></div>
+  </div>
+
+  <!-- DATA FORMATS -->
+  <div id="tab-formats" class="tab-panel">
+    <p style="color:var(--text-dim);font-size:14px;margin-bottom:1.5rem;">Click any constructor to expand its signature and accepted file formats.</p>
+
+    <div class="constructor-list">
+
+      <div class="constructor-card" onclick="toggleConstructor(this)">
+        <div class="constructor-header">
+          <div>
+            <div class="constructor-fn">createGiottoVisiumObject()</div>
+            <div class="constructor-platform">10x Visium · CytAssist Visium</div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="constructor-body">
+          <div class="code-block"><pre><span class="fn">createGiottoVisiumObject</span>(
+  <span class="arg">visium_dir</span>    = <span class="str">"/path/to/spaceranger/output"</span>,
+  <span class="arg">expr_data</span>     = <span class="str">"filter"</span>,  <span class="cm"># or "raw"</span>
+  <span class="arg">h5_visium_path</span> = <span class="kw">NULL</span>,     <span class="cm"># direct .h5 path</span>
+  <span class="arg">h5_tissue_positions_path</span> = <span class="kw">NULL</span>,
+  <span class="arg">h5_image_path</span> = <span class="kw">NULL</span>,
+  <span class="arg">h5_gene_ids</span>   = <span class="str">"symbols"</span>  <span class="cm"># or "ensembl"</span>
+)</pre></div>
+          <div class="format-tags">
+            <span class="fmt-tag">SpaceRanger dir</span>
+            <span class="fmt-tag">.h5 (expression)</span>
+            <span class="fmt-tag">tissue_positions_list.csv</span>
+            <span class="fmt-tag">scalefactors_json.json</span>
+            <span class="fmt-tag">.png (tissue image)</span>
+          </div>
+          <div class="fmt-note">Expects the standard SpaceRanger output directory layout: <code style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent)">filtered_feature_bc_matrix/</code> or <code style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent)">raw_feature_bc_matrix/</code> plus a <code style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent)">spatial/</code> folder.</div>
+        </div>
+      </div>
+
+      <div class="constructor-card" onclick="toggleConstructor(this)">
+        <div class="constructor-header">
+          <div>
+            <div class="constructor-fn">createGiottoXeniumObject()</div>
+            <div class="constructor-platform">10x Xenium</div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="constructor-body">
+          <div class="code-block"><pre><span class="fn">createGiottoXeniumObject</span>(
+  <span class="arg">xenium_dir</span>    = <span class="str">"/path/to/xenium/output"</span>,
+  <span class="arg">data_to_use</span>   = <span class="str">"subcellular"</span>,
+  <span class="arg">load_format</span>   = <span class="str">"csv"</span>,        <span class="cm"># or "parquet"</span>
+  <span class="arg">h5_expression</span> = <span class="kw">TRUE</span>,
+  <span class="arg">qv_threshold</span>  = <span class="cm">20</span>           <span class="cm"># quality value cutoff</span>
+)</pre></div>
+          <div class="format-tags">
+            <span class="fmt-tag">Xenium output dir</span>
+            <span class="fmt-tag">.csv (transcripts)</span>
+            <span class="fmt-tag">.parquet (transcripts)</span>
+            <span class="fmt-tag">.h5 (cell-feature matrix)</span>
+            <span class="fmt-tag">.tsv (features)</span>
+          </div>
+          <div class="fmt-note">Parquet format is recommended for large datasets — substantially faster than CSV for transcript-level data with millions of rows.</div>
+        </div>
+      </div>
+
+      <div class="constructor-card" onclick="toggleConstructor(this)">
+        <div class="constructor-header">
+          <div>
+            <div class="constructor-fn">createGiottoCosMxObject()</div>
+            <div class="constructor-platform">Nanostring CosMx</div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="constructor-body">
+          <div class="code-block"><pre><span class="fn">createGiottoCosMxObject</span>(
+  <span class="arg">cosmx_dir</span>     = <span class="str">"/path/to/cosmx/output"</span>,
+  <span class="arg">data_to_use</span>   = <span class="str">"all"</span>,  <span class="cm"># "subcellular" | "aggregate"</span>
+  <span class="arg">remove_na_col</span> = <span class="kw">TRUE</span>
+)</pre></div>
+          <div class="format-tags">
+            <span class="fmt-tag">CosMx output dir</span>
+            <span class="fmt-tag">tx_file (subcellular)</span>
+            <span class="fmt-tag">exprMat_file (aggregate)</span>
+            <span class="fmt-tag">metadata_file</span>
+          </div>
+          <div class="fmt-note"><strong style="color:var(--text-dim)">data_to_use modes:</strong> <code style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent)">"all"</code> loads both subcellular transcripts and aggregate cell-level matrix; <code style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent)">"subcellular"</code> loads only transcript-level; <code style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent)">"aggregate"</code> loads only the pre-aggregated matrix.</div>
+        </div>
+      </div>
+
+      <div class="constructor-card" onclick="toggleConstructor(this)">
+        <div class="constructor-header">
+          <div>
+            <div class="constructor-fn">createGiottoObjectSubcellular()</div>
+            <div class="constructor-platform">MERFISH · seqFISH · osmFISH · generic subcellular</div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="constructor-body">
+          <div class="code-block"><pre><span class="fn">createGiottoObjectSubcellular</span>(
+  <span class="arg">gpoints</span>    = transcript_coords,  <span class="cm"># giottoPoints object</span>
+  <span class="arg">gpolygons</span>  = cell_polygons,      <span class="cm"># giottoPolygon object</span>
+  <span class="arg">instructions</span> = my_instructions
+)</pre></div>
+          <div class="format-tags">
+            <span class="fmt-tag">transcript x/y coords</span>
+            <span class="fmt-tag">cell polygon boundaries</span>
+            <span class="fmt-tag">giottoPoints object</span>
+            <span class="fmt-tag">giottoPolygon object</span>
+          </div>
+          <div class="fmt-note">Used for any platform that provides transcript-level detections with cell boundary polygons. Build <code style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent)">giottoPoints</code> and <code style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent)">giottoPolygon</code> objects from coordinate data first.</div>
+        </div>
+      </div>
+
+      <div class="constructor-card" onclick="toggleConstructor(this)">
+        <div class="constructor-header">
+          <div>
+            <div class="constructor-fn">createGiottoObject()</div>
+            <div class="constructor-platform">Generic — any platform</div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="constructor-body">
+          <div class="code-block"><pre><span class="fn">createGiottoObject</span>(
+  <span class="arg">expression</span>      = counts_matrix,  <span class="cm"># or file path</span>
+  <span class="arg">spatial_locs</span>    = coords_df,      <span class="cm"># x, y, [z], cell_ID</span>
+  <span class="arg">expression_feat</span> = <span class="str">"rna"</span>,
+  <span class="arg">instructions</span>   = my_instructions
+)</pre></div>
+          <div class="format-tags">
+            <span class="fmt-tag">.csv / .tsv / .txt</span>
+            <span class="fmt-tag">matrix object</span>
+            <span class="fmt-tag">data.table</span>
+            <span class="fmt-tag">DelayedMatrix</span>
+            <span class="fmt-tag">named list (multi-modal)</span>
+          </div>
+          <div class="fmt-note">The fallback constructor for any platform. Expression matrix columns = cells, rows = features. Spatial location table needs numeric x/y columns; cell IDs come from the first non-numeric column.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ANALYSIS -->
+  <div id="tab-analysis" class="tab-panel">
+    <p style="color:var(--text-dim);font-size:14px;margin-bottom:1.5rem;">Click a capability to expand details.</p>
+    <div class="capability-grid">
+
+      <div class="cap-card" onclick="toggleCap(this)">
+        <div class="cap-icon">◈</div>
+        <div class="cap-title">Spatial Variable Genes</div>
+        <div class="cap-methods">SpatialDE · SPARK · binSpect</div>
+        <div class="cap-desc">Identifies genes whose expression varies significantly across space. Giotto wraps SpatialDE and SPARK, and includes its own binSpect method which uses the spatial network to test expression gradients.</div>
+      </div>
+
+      <div class="cap-card" onclick="toggleCap(this)">
+        <div class="cap-icon">◉</div>
+        <div class="cap-title">Cell-Type Deconvolution</div>
+        <div class="cap-methods">RCTD · CARD · Spotlight</div>
+        <div class="cap-desc">Estimates cell-type composition at each spot (for low-resolution data like Visium). Integrates with RCTD, CARD, and Spotlight using a scRNA-seq reference. Results are stored as cell metadata and can be visualized spatially.</div>
+      </div>
+
+      <div class="cap-card" onclick="toggleCap(this)">
+        <div class="cap-icon">⬡</div>
+        <div class="cap-title">Spatial Co-expression</div>
+        <div class="cap-methods">rankEnrich · page_enrich · HMRF</div>
+        <div class="cap-desc">Detects genes and gene modules with correlated spatial expression patterns. HMRF (Hidden Markov Random Field) models spatially coherent domains by combining expression and spatial context.</div>
+      </div>
+
+      <div class="cap-card" onclick="toggleCap(this)">
+        <div class="cap-icon">⬥</div>
+        <div class="cap-title">Cell-Proximity Enrichment</div>
+        <div class="cap-methods">cellProximityEnrichment · ICF</div>
+        <div class="cap-desc">Tests whether specific cell-type pairs appear in proximity more or less often than expected by chance. Requires a spatial network. Useful for identifying physical cell-cell interaction niches.</div>
+      </div>
+
+      <div class="cap-card" onclick="toggleCap(this)">
+        <div class="cap-icon">▣</div>
+        <div class="cap-title">Niche Clustering</div>
+        <div class="cap-methods">calculateSpatialEnrichment · niche</div>
+        <div class="cap-desc">Clusters cells based on the composition of their local neighborhood — combining a cell's own expression with information about surrounding cell types. Captures microenvironment context beyond single-cell clustering.</div>
+      </div>
+
+      <div class="cap-card" onclick="toggleCap(this)">
+        <div class="cap-icon">◌</div>
+        <div class="cap-title">Dimensionality Reduction</div>
+        <div class="cap-methods">runPCA · runUMAP · spatialPCA</div>
+        <div class="cap-desc">Standard PCA and UMAP are available, plus spatially-aware alternatives that incorporate coordinate information into the embedding. Results integrate with standard Giotto visualization functions.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ARCHITECTURE -->
+  <div id="tab-architecture" class="tab-panel">
+
+    <div class="arch-section">
+      <h3>The giotto S4 object</h3>
+      <div class="slots-grid">
+        <div class="slot-item">
+          <div class="slot-name">@expression</div>
+          <div class="slot-desc">Count / normalized matrices (named list by type)</div>
+        </div>
+        <div class="slot-item">
+          <div class="slot-name">@spatial_locs</div>
+          <div class="slot-desc">x, y, (z) coordinates per cell</div>
+        </div>
+        <div class="slot-item">
+          <div class="slot-name">@cell_metadata</div>
+          <div class="slot-desc">Per-cell annotations, deconvolution results</div>
+        </div>
+        <div class="slot-item">
+          <div class="slot-name">@feat_metadata</div>
+          <div class="slot-desc">Per-feature (gene) annotations</div>
+        </div>
+        <div class="slot-item">
+          <div class="slot-name">@spatial_network</div>
+          <div class="slot-desc">kNN or Delaunay neighborhood graphs</div>
+        </div>
+        <div class="slot-item">
+          <div class="slot-name">@spatial_grid</div>
+          <div class="slot-desc">Binned grid representations</div>
+        </div>
+        <div class="slot-item">
+          <div class="slot-name">@images</div>
+          <div class="slot-desc">Tissue images (giottoImage, SpatRaster)</div>
+        </div>
+        <div class="slot-item">
+          <div class="slot-name">@dimension_reduction</div>
+          <div class="slot-desc">PCA, UMAP embeddings</div>
+        </div>
+        <div class="slot-item">
+          <div class="slot-name">@nn_network</div>
+          <div class="slot-desc">Cell-cell kNN graph (expression-based)</div>
+        </div>
+        <div class="slot-item">
+          <div class="slot-name">@gpoints</div>
+          <div class="slot-desc">Subcellular transcript coordinates</div>
+        </div>
+        <div class="slot-item">
+          <div class="slot-name">@gpolygons</div>
+          <div class="slot-desc">Cell boundary polygons</div>
+        </div>
+        <div class="slot-item">
+          <div class="slot-name">@instructions</div>
+          <div class="slot-desc">Analysis settings and output paths</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-section">
+      <h3>Spatial network construction</h3>
+      <div class="code-block"><pre><span class="cm"># Delaunay triangulation (topology-based)</span>
+<span class="fn">createSpatialNetwork</span>(<span class="arg">gobject</span> = giotto_obj, <span class="arg">method</span> = <span class="str">"Delaunay"</span>)
+
+<span class="cm"># k-nearest neighbors by distance</span>
+<span class="fn">createSpatialNetwork</span>(<span class="arg">gobject</span> = giotto_obj, <span class="arg">method</span> = <span class="str">"kNN"</span>, <span class="arg">k</span> = <span class="cm">6</span>)</pre></div>
+      <div class="note-box">
+        <strong>Important:</strong> spatial network construction must happen before running spatial statistics — binSpect, cellProximityEnrichment, HMRF, and niche clustering all require it. Build the network immediately after normalization and before any spatial analysis step.
+      </div>
+    </div>
+
+    <div class="arch-section">
+      <h3>Large dataset handling</h3>
+      <div class="note-box">
+        For high-resolution datasets (Xenium, Visium HD, MERSCOPE) with millions of transcripts, Giotto uses <strong>terra / SpatRaster</strong> image-backed objects. These keep data on disk rather than in RAM, enabling analysis of tissue sections that would otherwise exhaust memory. The interface is the same; the backing changes transparently.
+      </div>
+    </div>
+
+    <div class="arch-section">
+      <h3>Ecosystem modules</h3>
+      <div class="arch-flow">
+        <div class="arch-node highlight">GiottoClass</div>
+        <div class="arch-arrow">—</div>
+        <div class="arch-node" style="color:var(--text-dim)">S4 object definitions, data structures</div>
+      </div>
+      <div class="arch-flow" style="margin-top:0.6rem">
+        <div class="arch-node" style="color:var(--accent2);border-color:rgba(129,140,248,0.3)">GiottoUtils</div>
+        <div class="arch-arrow">—</div>
+        <div class="arch-node" style="color:var(--text-dim)">Internal helpers, data manipulation</div>
+      </div>
+      <div class="arch-flow" style="margin-top:0.6rem">
+        <div class="arch-node" style="color:var(--seq);border-color:rgba(52,211,153,0.3)">GiottoVisuals</div>
+        <div class="arch-arrow">—</div>
+        <div class="arch-node" style="color:var(--text-dim)">Plotting functions, spatial visualization</div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<footer>
+  <div class="container">
+    Giotto Suite · <a href="https://www.nature.com/articles/s41592-025-02817-w" target="_blank">Nature Methods 2025</a> ·
+    <a href="https://giottosuite.readthedocs.io" target="_blank">Documentation</a>
+  </div>
+</footer>
+
+<script>
+  // Platform detail data
+  const platforms = {
+    visium: {
+      fn: 'createGiottoVisiumObject()',
+      desc: 'Standard SpaceRanger output directory. Reads filtered or raw feature-barcode matrix, tissue positions CSV, scalefactors JSON, and tissue PNG image.',
+      tags: ['SpaceRanger dir', '.h5', 'tissue_positions_list.csv', 'scalefactors_json.json', '.png']
+    },
+    cytassist: {
+      fn: 'createGiottoVisiumObject()',
+      desc: 'Same constructor as standard Visium. CytAssist FFPE data follows identical SpaceRanger output structure.',
+      tags: ['SpaceRanger dir', '.h5', '.csv coords', '.json scalefactors', '.png']
+    },
+    stereoseq: {
+      fn: 'createGiottoObject()',
+      desc: 'Load via the generic constructor with a count matrix and spatial coordinates derived from the Stereo-seq DNB grid positions.',
+      tags: ['.csv / .tsv', 'matrix object', 'x/y coords']
+    },
+    seqscope: {
+      fn: 'createGiottoObject()',
+      desc: 'Generic constructor. Use Seq-Scope coordinate output alongside the count matrix.',
+      tags: ['.csv / .tsv', 'matrix object', 'x/y coords']
+    },
+    spatialgenomics: {
+      fn: 'createGiottoObject()',
+      desc: 'Generic constructor with coordinate file from Spatial Genomics output.',
+      tags: ['count matrix', 'x/y coords', '.csv / .tsv']
+    },
+    xenium: {
+      fn: 'createGiottoXeniumObject()',
+      desc: 'Dedicated constructor. Reads the Xenium output directory directly. Supports CSV or Parquet transcript files and H5 cell-feature matrix. Parquet is preferred for large runs.',
+      tags: ['Xenium output dir', '.csv', '.parquet', '.h5', '.tsv (features)']
+    },
+    merscope: {
+      fn: 'createGiottoObjectSubcellular()',
+      desc: 'Vizgen MERSCOPE provides transcript detections and cell boundaries. Build giottoPoints from the detected_transcripts CSV and giottoPolygon from the cell boundary files.',
+      tags: ['detected_transcripts.csv', 'cell_boundaries/', 'giottoPoints', 'giottoPolygon']
+    },
+    merfish: {
+      fn: 'createGiottoObjectSubcellular()',
+      desc: 'Generic subcellular constructor. Requires transcript x/y coordinates and cell polygon boundaries. Format depends on analysis pipeline used.',
+      tags: ['transcript coords', 'cell polygons', '.csv / .txt']
+    },
+    seqfish: {
+      fn: 'createGiottoObjectSubcellular()',
+      desc: 'Subcellular constructor with seqFISH transcript detections and cell segmentation outputs.',
+      tags: ['transcript coords', 'cell polygons', '.csv']
+    },
+    osmfish: {
+      fn: 'createGiottoObjectSubcellular()',
+      desc: 'Subcellular constructor. osmFISH provides transcript-level detections suitable for giottoPoints.',
+      tags: ['transcript coords', 'cell polygons']
+    },
+    cosmx: {
+      fn: 'createGiottoCosMxObject()',
+      desc: 'Dedicated constructor for Nanostring CosMx. Three loading modes: "all" (subcellular + aggregate), "subcellular" (transcript detections only), or "aggregate" (pre-summed cell matrix only).',
+      tags: ['CosMx output dir', 'tx_file', 'exprMat_file', 'metadata_file']
+    },
+    codex: {
+      fn: 'createGiottoObject()',
+      desc: 'Generic constructor. Load CODEX protein expression matrix alongside cell centroid coordinates from segmentation output.',
+      tags: ['protein matrix', 'cell centroids', '.csv / .tsv']
+    },
+    resolve: {
+      fn: 'createGiottoObjectSubcellular()',
+      desc: 'Resolve Biosciences data uses a subcellular approach with transcript coordinates and cell polygons.',
+      tags: ['transcript coords', 'cell boundaries']
+    },
+    scrna: {
+      fn: 'Integration / deconvolution',
+      desc: 'scRNA-seq data is used as a reference for cell-type deconvolution (RCTD, CARD, Spotlight). Not loaded directly as a giotto object — pass as a Seurat or SCE reference to the deconvolution functions.',
+      tags: ['Seurat object', 'SingleCellExperiment', 'reference for RCTD/CARD/Spotlight']
+    }
+  };
+
+  function showPlatform(id, el) {
+    // Deactivate all cards
+    document.querySelectorAll('.platform-card').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+
+    const detail = document.getElementById('platform-detail');
+    const p = platforms[id];
+    if (!p) return;
+
+    detail.innerHTML = `
+      <div class="detail-fn">${p.fn}</div>
+      <p style="font-size:14px;color:var(--text-dim);margin-bottom:0.75rem;line-height:1.7">${p.desc}</p>
+      <div class="detail-inputs">
+        ${p.tags.map(t => `<span class="input-tag">${t}</span>`).join('')}
+      </div>
+    `;
+    detail.classList.add('visible');
+    detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function toggleConstructor(card) {
+    const wasOpen = card.classList.contains('open');
+    document.querySelectorAll('.constructor-card').forEach(c => c.classList.remove('open'));
+    if (!wasOpen) card.classList.add('open');
+  }
+
+  function toggleCap(card) {
+    const wasActive = card.classList.contains('active');
+    document.querySelectorAll('.cap-card').forEach(c => c.classList.remove('active'));
+    if (!wasActive) card.classList.add('active');
+  }
+
+  function switchTab(name, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    btn.classList.add('active');
+    // Reset platform detail on tab switch
+    const detail = document.getElementById('platform-detail');
+    if (detail) { detail.classList.remove('visible'); }
+    document.querySelectorAll('.platform-card').forEach(c => c.classList.remove('active'));
+  }
+</script>
+</body>
+</html>
